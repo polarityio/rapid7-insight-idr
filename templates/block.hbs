@@ -1,0 +1,425 @@
+{{#if details.foundQueryLogs.length}}
+  {{#if (get expandableTitleStates "logsExpanded.0")}}
+    <a
+      href="#"
+      class="expandable-title larger"
+      {{on "click" (action "toggleExpandableTitle" "logsExpanded" 0)}}
+    >
+      <span class="text">Logs</span> {{fa-icon "angle-up"}}
+    </a>
+    {{#each details.foundQueryLogs as |QL QLIndex|}}
+      {{#if (gt QLIndex 0)}}
+        <hr>
+      {{/if}}
+      <div class="section">
+        {{#if QL.message.event}}
+          <div>
+            <span class="p-key">Event: </span>
+            <span class="p-value">{{QL.message.event}}</span>
+          </div>
+        {{/if}}
+        {{#if QL.message.alert}}
+          {{#if QL.message.alert.name}}
+            <div>
+              <span class="p-key">Alert Name: </span>
+              <span class="p-value">{{QL.message.alert.name}}</span>
+            </div>
+          {{/if}}
+          {{#if QL.message.alert.type}}
+            <div>
+              <span class="p-key">Alert Type: </span>
+              <span class="p-value">{{QL.message.alert.type}}</span>
+            </div>
+          {{/if}}
+        {{/if}}
+        {{#if QL.message.alert_state}}
+          <div>
+            <span class="p-key">Alert State: </span>
+            <span class="p-value">{{QL.message.alert_state}}</span>
+          </div>
+        {{/if}}
+        {{#if QL.message.alert.query}}
+          <div>
+            <span class="p-key">Alert Query: </span>
+            <span class="p-value">{{QL.message.alert.query}}</span>
+          </div>
+        {{/if}}
+
+        {{#if QL.message.ip_address}}
+          <div>
+            <span class="p-key">IP Address: </span>
+            <span class="p-value">{{QL.message.ip_address}}</span>
+          </div>
+        {{/if}}
+        {{#if QL.message.user}}
+          <div>
+            <span class="p-key">User: </span>
+            <span class="p-value">{{QL.message.user}}</span>
+          </div>
+        {{/if}}
+        {{#if QL.message.action}}
+          <div>
+            <span class="p-key">Action: </span>
+            <span class="p-value">{{QL.message.action}}</span>
+          </div>
+        {{/if}}
+        {{#if QL.message.action_success}}
+          <div>
+            <span class="p-key">Action Succeeded: </span>
+            <span class="p-value">{{QL.message.action}}</span>
+          </div>
+        {{/if}}
+        {{#if QL.timestamp}}
+          <div>
+            <span class="p-key">DateTime: </span>
+            <span class="p-value">{{moment-format QL.timestamp "MM/DD/YYYY HH:mm:ss" timeZone=timezone}}</span>
+          </div>
+        {{/if}}
+        {{#if QL.message.api_key}}
+          <div>
+            <span class="p-key">API Key Type: </span>
+            <span class="p-value">{{QL.message.api_key}}</span>
+          </div>
+        {{/if}}
+
+        
+
+        {{#if QL.message.log}}
+          {{#if QL.message.log.name}}
+            <div>
+              <span class="p-key">Name: </span>
+              <span class="p-value">{{QL.message.log.name}}</span>
+            </div>
+          {{/if}}
+          {{#if QL.message.log.logsets.length}}
+            <div>
+              <span class="p-key">Log Set{{if (gt QL.message.log.logsets.length 1) "s" ""}}: </span>
+              <span class="p-value">
+                {{#each QL.message.log.logsets as |logset i|}}
+                  {{logset.name}}{{#if (not (eq i (sub  QL.message.log.logsets.length 1)))}}, {{/if}}
+                {{/each}}
+              </span>
+            </div>
+          {{/if}}
+        {{/if}}
+        {{#if QL.message.alert.log}}
+          {{#if QL.message.alert.log.name}}
+            <div>
+              <span class="p-key">Alert Log Name: </span>
+              <span class="p-value">{{QL.message.alert.log.name}}</span>
+            </div>
+          {{/if}}
+          {{#if QL.message.alert.log.logsets.length}}
+            <div>
+              <span class="p-key">Log Set{{if (gt QL.message.alert.log.logsets.length 1) "s" ""}}: </span>
+              <span class="p-value">
+                {{#each QL.message.alert.log.logsets as |logset i|}}
+                  {{logset.name}}{{#if (not (eq i (sub  QL.message.alert.log.logsets.length 1)))}}, {{/if}}
+                {{/each}}
+              </span>
+            </div>
+          {{/if}}
+        {{/if}}
+        {{#if QL.message.alert_instance.log}}
+          {{#if QL.message.alert_instance.log.name}}
+            <div>
+              <span class="p-key">Instance Name: </span>
+              <span class="p-value">{{QL.message.alert_instance.log.name}}</span>
+            </div>
+          {{/if}}
+          {{#if QL.message.alert_instance.log.logsets.length}}
+            <div>
+              <span class="p-key">Log Set{{if (gt QL.message.alert_instance.log.logsets.length 1) "s" ""}}: </span>
+              <span class="p-value">
+                {{#each QL.message.alert_instance.log.logsets as |logset i|}}
+                  {{logset.name}}{{#if (not (eq i (sub  QL.message.alert_instance.log.logsets.length 1)))}}, {{/if}}
+                {{/each}}
+              </span>
+            </div>
+          {{/if}}
+        {{/if}}
+        
+        {{#if QL.labels}}
+          <div>
+            <span class="p-key">Label{{if (gt QL.labels.length 1) "s" ""}}: </span>
+            <span class="p-value">{{join ", " QL.labels}}</span>
+          </div>
+        {{/if}}
+
+        {{#if QL.message.targets.length}}
+          {{#if (get expandableTitleStates (concat "targets." QLIndex))}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'targets' QLIndex)}}
+            >
+              <span class="text">Target{{if (gt QL.message.targets.length 1) "s" ""}}</span> {{fa-icon "angle-up"}}
+            </a>
+            {{#each QL.message.targets as |target targetIndex|}}
+              <div class='log-container'>
+                {{#if target.type}}
+                  <div>
+                    <span class="p-key">Target Type: </span>
+                    <span class="p-value">{{target.type}}</span>
+                  </div>
+                {{/if}}
+                {{#if target.name}}
+                  <div>
+                    <span class="p-key">Target Name: </span>
+                    <span class="p-value">{{target.name}}</span>
+                  </div>
+                {{/if}}
+                {{#if target.email}}
+                  <div>
+                    <span class="p-key">Target Email: </span>
+                    <span class="p-value">{{target.email}}</span>
+                  </div>
+                {{/if}}
+                {{#if (or (eq target.notification_success true) (eq target.notification_success false))}}
+                  <div>
+                    <span class="p-key">Notification Success: </span>
+                    <span class="p-value">{{target.notification_success}}</span>
+                  </div>
+                {{else}}
+                  {{object-to-table target.notification_success}}
+                {{/if}}
+              </div>
+            {{/each}}
+          {{else}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'targets' QLIndex)}}
+            >
+              <span class="text">Target{{if (gt QL.message.targets.length 1) "s" ""}}</span> {{fa-icon "angle-down"}}
+            </a>
+          {{/if}}
+        {{/if}}
+
+
+        {{#if QL.message.logs.length}}
+          {{#if (get expandableTitleStates (concat "logs." QLIndex))}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'logs' QLIndex)}}
+            >
+              <span class="text">Log{{if (gt QL.message.logs.length 1) "s" ""}}</span> {{fa-icon "angle-up"}}
+            </a>
+            {{#each QL.message.logs as |log|}}
+              <div class='log-container'>
+                {{#if log.name}}
+                  <div>
+                    <span class="p-key">Name: </span>
+                    <span class="p-value">{{log.name}}</span>
+                  </div>
+                {{/if}}
+                {{#if log.logsets.length}}
+                  <div>
+                    <span class="p-key">Log Set{{if (gt log.logsets.length 1) "s" ""}}: </span>
+                    <span class="p-value">
+                      {{#each log.logsets as |logset i|}}
+                        {{logset.name}}{{#if (not (eq i (sub log.logsets.length 1)))}}, {{/if}}
+                      {{/each}}
+                    </span>
+                  </div>
+                {{/if}}
+              </div>
+            {{/each}}
+          {{else}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'logs' QLIndex)}}
+            >
+              <span class="text">Log{{if (gt QL.message.logs.length 1) "s" ""}}</span> {{fa-icon "angle-down"}}
+            </a>
+          {{/if}}
+        {{/if}}
+        {{#if QL.message.alert.logs.length}}
+          {{#if (get expandableTitleStates (concat "logs." QLIndex))}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'logs' QLIndex)}}
+            >
+              <span class="text">Alert Log{{if (gt QL.message.alert.logs.length 1) "s" ""}}</span> {{fa-icon "angle-up"}}
+            </a>
+            {{#each QL.message.alert.logs as |log|}}
+              <div class='log-container'>
+                {{#if log.name}}
+                  <div>
+                    <span class="p-key">Alert Log Name: </span>
+                    <span class="p-value">{{log.name}}</span>
+                  </div>
+                {{/if}}
+                {{#if log.logsets.length}}
+                  <div>
+                    <span class="p-key">Log Set{{if (gt log.logsets.length 1) "s" ""}}: </span>
+                    <span class="p-value">
+                      {{#each log.logsets as |logset i|}}
+                        {{logset.name}}{{#if (not (eq i (sub log.logsets.length 1)))}}, {{/if}}
+                      {{/each}}
+                    </span>
+                  </div>
+                {{/if}}
+              </div>
+            {{/each}}
+          {{else}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'logs' QLIndex)}}
+            >
+              <span class="text">Alert Log{{if (gt QL.message.alert.logs.length 1) "s" ""}}</span> {{fa-icon "angle-down"}}
+            </a>
+          {{/if}}
+        {{/if}}
+        {{#if QL.message.alert_instance.logs.length}}
+          {{#if (get expandableTitleStates (concat "logs." QLIndex))}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'logs' QLIndex)}}
+            >
+              <span class="text">Alert Instance Log{{if (gt QL.message.alert_instance.logs.length 1) "s" ""}}</span> {{fa-icon "angle-up"}}
+            </a>
+            {{#each QL.message.alert_instance.logs as |log|}}
+              <div class='log-container'>
+                {{#if log.name}}
+                  <div>
+                    <span class="p-key">Instance Name: </span>
+                    <span class="p-value">{{log.name}}</span>
+                  </div>
+                {{/if}}
+                {{#if log.logsets.length}}
+                  <div>
+                    <span class="p-key">Log Set{{if (gt log.logsets.length 1) "s" ""}}: </span>
+                    <span class="p-value">
+                      {{#each log.logsets as |logset i|}}
+                        {{logset.name}}{{#if (not (eq i (sub log.logsets.length 1)))}}, {{/if}}
+                      {{/each}}
+                    </span>
+                  </div>
+                {{/if}}
+              </div>
+            {{/each}}
+          {{else}}
+            <a
+              href="#"
+              class="expandable-title"
+              {{on "click" (action "toggleExpandableTitle" 'logs' QLIndex)}}
+            >
+              <span class="text">Alert Instance Log{{if (gt QL.message.alert_instance.logs.length 1) "s" ""}}</span> {{fa-icon "angle-down"}}
+            </a>
+          {{/if}}
+        {{/if}}
+      </div>
+    {{/each}}
+  {{else}}
+    <a
+      href="#"
+      class="expandable-title larger"
+      {{on "click" (action "toggleExpandableTitle"  "logsExpanded" 0)}}
+    >
+      <span class="text">Logs</span> {{fa-icon "angle-down"}}
+    </a>
+  {{/if}}
+{{/if}}
+
+{{#if details.foundInvestigations.length}}
+  {{#if (get expandableTitleStates "investigationsExpanded.0")}}
+    <a
+      href="#"
+      class="expandable-title larger"
+      {{on "click" (action "toggleExpandableTitle" "investigationsExpanded" 0)}}
+    >
+      <span class="text">Investigations</span> {{fa-icon "angle-up"}}
+    </a>
+    {{#each details.foundInvestigations as |investigation investigationIndex|}}
+      {{#if (gt investigationIndex 0)}}
+        <hr>
+      {{/if}}
+      <div class="section">
+        {{#if investigation.title}}
+          <div>
+            <span class="p-key">Title: </span>
+            <span class="p-value">{{investigation.title}}</span>
+          </div>
+        {{/if}}
+        {{#if investigation.source}}
+          <div>
+            <span class="p-key">Source: </span>
+            <span class="p-value">{{investigation.source}}</span>
+          </div>
+        {{/if}}
+        {{#if investigation.status}}
+          <div>
+            <span class="p-key">Status: </span>
+            <span class="p-value">{{investigation.status}}</span>
+          </div>
+        {{/if}}
+        {{#if investigation.assignee}}
+          <div>
+            <span class="p-key">Assignee: </span>
+            <span class="p-value">{{investigation.assignee.name}}({{investigation.assignee.email}})</span>
+          </div>
+        {{/if}}
+
+        {{#if investigation.alerts.length}}
+          {{#if (gt investigation.alerts.length 1)}}
+            {{#each investigation.alerts as |alert|}}
+              <div class='log-container'>
+                {{#if alert.type}}
+                  <div>
+                    <span class="p-key">Alert Type: </span>
+                    <span class="p-value">{{alert.type}}</span>
+                  </div>
+                {{/if}}
+                {{#if alert.type_description}}
+                  <div>
+                    <span class="p-key">Alert Description: </span>
+                    <span class="p-value">{{alert.type_description}}</span>
+                  </div>
+                {{/if}}
+                {{#if alert.first_event_time}}
+                  <div>
+                    <span class="p-key">Alert Time: </span>
+                    <span class="p-value">{{moment-format alert.first_event_time "MM/DD/YYYY HH:mm:ss" timeZone=timezone}}</span>
+                  </div>
+                {{/if}}
+              </div>
+            {{/each}}
+          {{else}}
+            {{#if (get investigation.alerts "0.type")}}
+              <div>
+                <span class="p-key">Alert Type: </span>
+                <span class="p-value">{{get investigation.alerts "0.type"}}</span>
+              </div>
+            {{/if}}
+            {{#if (get investigation.alerts "0.type_description")}}
+              <div>
+                <span class="p-key">Alert Description: </span>
+                <span class="p-value">{{get investigation.alerts "0.type_description"}}</span>
+              </div>
+            {{/if}}
+            {{#if (get investigation.alerts "0.first_event_time")}}
+              <div>
+                <span class="p-key">Alert Time: </span>
+                <span class="p-value">{{moment-format (get investigation.alerts "0.first_event_time") "MM/DD/YYYY HH:mm:ss" timeZone=timezone}}</span>
+              </div>
+            {{/if}}
+          {{/if}}
+        {{/if}}
+      </div>
+    {{/each}} 
+  {{else}}
+    <a
+      href="#"
+      class="expandable-title larger"
+      {{on "click" (action "toggleExpandableTitle" "investigationsExpanded" 0)}}
+    >
+      <span class="text">Investigations</span> {{fa-icon "angle-down"}}
+    </a>
+  {{/if}}
+{{/if}}

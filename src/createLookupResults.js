@@ -1,19 +1,19 @@
-const fp = require('lodash/fp');
+const { flow, map, size, compact } = require('lodash/fp');
 
-let maxUniqueKeyNumber = 0;
-
-const createLookupResults = (foundEntities, Logger) =>
-  fp.flow(
-    fp.map(({ entity, result }) => {
+const createLookupResults = (foundEntities, threats, Logger) =>
+  flow(
+    map(({ entity, foundQueryLogs, foundInvestigations }) => {
       let lookupResult;
-      if (fp.size(result)) {
-        maxUniqueKeyNumber++;
-        const formattedResult = formatResult(result);
+      if (size(foundQueryLogs) || size(foundInvestigations)) {
         lookupResult = {
           entity,
           data: {
-            summary: createSummary(formattedResult),
-            details: formattedResult
+            summary: createSummary(foundQueryLogs, foundInvestigations),
+            details: {
+              foundQueryLogs,
+              foundInvestigations,
+              threats
+            }
           }
         };
       } else {
@@ -24,15 +24,17 @@ const createLookupResults = (foundEntities, Logger) =>
       }
       return lookupResult;
     }),
-    fp.compact
+    compact
   )(foundEntities);
 
-const createSummary = (result) => [];
+const createSummary = (foundQueryLogs, foundInvestigations) => {
+  const foundQueryLogsSize = size(foundQueryLogs);
+  const foundInvestigationsSize = size(foundInvestigations);
 
-
-const formatResult = (result) => ({
-  ...result,
-
-});
+  return [
+    ...(foundQueryLogsSize ? [`Query Logs: ${foundQueryLogsSize}`] : []),
+    ...(foundInvestigationsSize ? [`Investigations: ${foundInvestigationsSize}`] : [])
+  ];
+};
 
 module.exports = createLookupResults;

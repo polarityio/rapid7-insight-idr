@@ -76,10 +76,7 @@ const createRequestWithDefaults = (Logger) => {
 
   const requestDefaultsWithInterceptors = requestWithDefaults();
 
-  return {
-    requestWithDefaults: requestDefaultsWithInterceptors,
-    requestDefaults: defaults
-  };
+  return requestDefaultsWithInterceptors
 };
 
 module.exports = createRequestWithDefaults;

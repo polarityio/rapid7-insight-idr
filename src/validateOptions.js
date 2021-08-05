@@ -1,19 +1,65 @@
 const fp = require('lodash/fp');
 const reduce = require('lodash/fp/reduce').convert({ cap: false });
+let schedule = require('node-schedule');
 
-const validateOptions = (options, callback) => {
-  const stringOptionsErrorMessages = {
-    //TODO
+const refreshInvestigations = require('./refreshInvestigations');
+const { parseKeyValueOptionList } = require('./dataTransformations');
+const { INVESTIGATION_REFRESH_TIME } = require('./constants');
+
+const validateOptions =
+  (setInvestigations, setJob, getRequestWithDefaults, getLogger) =>
+  (options, callback) => {
+    const Logger = getLogger();
+    const requestWithDefaults = getRequestWithDefaults();
+    const stringOptionsErrorMessages = {
+      apiKey: 'You must provide a valid API Key from your Nexpose Insight Account',
+      logQuery: 'You must have a query, and cannot leave this field blank'
+    };
+
+    const stringValidationErrors = _validateStringOptions(
+      stringOptionsErrorMessages,
+      options
+    );
+
+    const logQueryHasNoEntity = !fp.includes('{{ENTITY}}', options.logQuery.value)
+      ? [
+          {
+            key: 'logQuery',
+            message:
+              'You must have the string "{{ENTITY}}", somewhere in your query or it will not work.'
+          }
+        ]
+      : [];
+
+    const parsedThreats = parseKeyValueOptionList('threats', options, true);
+
+    const threatsNotParsable = fp.every(fp.flow(fp.size, fp.eq(2)), parsedThreats)
+      ? [
+          {
+            key: 'threats',
+            message: 'Threats not formatted correctly.'
+          }
+        ]
+      : [];
+
+    const errors = stringValidationErrors
+      .concat(logQueryHasNoEntity)
+      .concat(threatsNotParsable);
+
+    if (!errors.length) {
+      Logger.info(
+        `Refresh Investigations Data Time set to ${INVESTIGATION_REFRESH_TIME} minutes`
+      );
+      setJob(
+        schedule.scheduleJob(
+          `*/${INVESTIGATION_REFRESH_TIME} * * * *`,
+          refreshInvestigations(setInvestigations, options, requestWithDefaults, Logger)
+        )
+      );
+    }
+
+    callback(null, errors);
   };
-
-  const stringValidationErrors = _validateStringOptions(
-    stringOptionsErrorMessages,
-    options
-  );
-
-  
-  callback(null, stringValidationErrors);
-};
 
 const _validateStringOptions = (stringOptionsErrorMessages, options, otherErrors = []) =>
   reduce((agg, message, optionName) => {
