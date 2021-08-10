@@ -1,4 +1,4 @@
-const fp = require('lodash/fp');
+const { includes, size, flow, isEmpty, get } = require('lodash/fp');
 const reduce = require('lodash/fp/reduce').convert({ cap: false });
 let schedule = require('node-schedule');
 
@@ -21,7 +21,7 @@ const validateOptions =
       options
     );
 
-    const logQueryHasNoEntity = !fp.includes('{{ENTITY}}', options.logQuery.value)
+    const logQueryHasNoEntity = !includes('{{ENTITY}}', options.logQuery.value)
       ? [
           {
             key: 'logQuery',
@@ -31,16 +31,23 @@ const validateOptions =
         ]
       : [];
 
-    const parsedThreats = parseKeyValueOptionList('threats', options, true);
+    const threatNamesAreValid =
+      (size(get('threats.value', options)) &&
+        flow(get('threats.value'), includes('->'))(options)) ||
+      !size(get('threats.value', options));
+      
+    const parsedThreats =
+      threatNamesAreValid && size(get('threats.value', options)) && parseKeyValueOptionList('threats', options, true);
 
-    const threatsNotParsable = fp.every(fp.flow(fp.size, fp.eq(2)), parsedThreats)
-      ? [
-          {
-            key: 'threats',
-            message: 'Threats not formatted correctly.'
-          }
-        ]
-      : [];
+    const threatsNotParsable =
+      !threatNamesAreValid || parsedThreats === false
+        ? [
+            {
+              key: 'threats',
+              message: 'Threats not formatted correctly.'
+            }
+          ]
+        : [];
 
     const errors = stringValidationErrors
       .concat(logQueryHasNoEntity)
@@ -64,7 +71,7 @@ const validateOptions =
 const _validateStringOptions = (stringOptionsErrorMessages, options, otherErrors = []) =>
   reduce((agg, message, optionName) => {
     const isString = typeof options[optionName].value === 'string';
-    const isEmptyString = isString && fp.isEmpty(options[optionName].value);
+    const isEmptyString = isString && isEmpty(options[optionName].value);
 
     return !isString || isEmptyString
       ? agg.concat({

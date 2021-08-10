@@ -1,11 +1,9 @@
-const fp = require('lodash/fp');
-
-const { splitOutIgnoredIps } = require('./dataTransformations');
-const { parseKeyValueOptionList } = require('./dataTransformations');
+const { parseKeyValueOptionList, splitOutIgnoredIps } = require('./dataTransformations');
 
 const searchQueryLogs = require('./searchQueryLogs');
 const searchInvestigations = require('./searchInvestigations');
 const createLookupResults = require('./createLookupResults');
+const { map } = require('lodash/fp');
 
 const getLookupResults = async (
   entities,
@@ -39,7 +37,7 @@ const _getFoundEntities = async (
   Logger
 ) =>
   Promise.all(
-    fp.map(async (entity) => {
+    map(async (entity) => {
       const foundQueryLogs = await searchQueryLogs(
         entity,
         options,
@@ -47,11 +45,7 @@ const _getFoundEntities = async (
         Logger
       );
 
-      const foundInvestigations = searchInvestigations(
-        entity,
-        investigations,
-        Logger
-      );
+      const foundInvestigations = searchInvestigations(entity, investigations, Logger);
 
       return { entity, foundQueryLogs, foundInvestigations };
     }, entitiesPartition)

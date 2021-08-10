@@ -34,9 +34,11 @@ The amount of time back you would like to see logs from. Supported values includ
 
 
 ### Threats To add Indicators To
-This is a comma separated list of Threats you will be able to add entities/indicators to.  The format to use is `Threat Name 1->threat-uuid-1, Threat Name 2->threat-uuid-2` (e.g. `MP-Threat->832f42d1-9247-4e35-b521-f815d84e0df0, ...`).
+This is a comma separated list of Threats you will be able to add entities/indicators to.  The format to use is `Threat Name 1->threat-key-uuid-1, Threat Name 2->threat-uuid-2` (e.g. `MP Threat->832f42d1-9247-4e35-b521-f815d84e0df0, ...`). 
 
->*NOTE:* If left blank adding an indicator to threats will be disabled.
+[View Documentation](https://docs.rapid7.com/insightidr/threats/) for more details on how to get your Threat Key UUIDs.
+
+>***NOTE:*** If left blank, adding an indicator to threats will be disabled.
 
 ## Installation Instructions
 

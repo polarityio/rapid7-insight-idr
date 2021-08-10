@@ -117,9 +117,12 @@ module.exports = {
       name: 'Threats To add Indicators To',
       description:
         'This is a comma separated list of Threats you will be able to add ' +
-        'entities/indicators to.  The format to use is "Threat Name 1->threat-uuid-1, ' +
-        'Threat Name 2->threat-uuid-2" (e.g. "MP-Threat->832f42d1-9247-4e35-b521-f815d84e0df0, ..."). ' +
-        'If left blank adding an indicator to threats will be disabled.',
+        'entities/indicators to.  The format to use is ' +
+        '"Threat Name 1->threat-uuid-1, Threat Name 2->threat-uuid-2" (e.g. ' +
+        '"MP Threat->832f42d1-9247-4e35-b521-f815d84e0df0, ..."). ' +
+        'View Documentation for more details on how to get your Threat Key UUIDs. ' +
+        '(https://docs.rapid7.com/insightidr/threats/) ' +
+        'If left blank, adding an indicator/entities to threats will be disabled.',
       default: '',
       type: 'text',
       userCanEdit: true,

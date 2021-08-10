@@ -46,7 +46,10 @@ const parseKeyValueOptionList = (key, options, inValidateOptions = false) =>
     fp.get(inValidateOptions ? `${key}.value` : key),
     fp.split(','),
     fp.map(fp.flow(fp.split('->'), fp.map(fp.trim))),
-    fp.reduce((agg, [key, value]) => ({ ...agg, [key]: value }), {})
+    fp.reduce((agg, [key, value]) => {
+      if(!key || !value || agg === false) return false 
+      return { ...agg, [key]: value };
+    }, {})
   )(options);
 
 const or =

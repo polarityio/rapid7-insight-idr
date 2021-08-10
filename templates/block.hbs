@@ -1,13 +1,64 @@
-{{#if details.foundQueryLogs.length}}
-  {{#if (get expandableTitleStates "logsExpanded.0")}}
-    <a
-      href="#"
-      class="expandable-title larger"
-      {{on "click" (action "toggleExpandableTitle" "logsExpanded" 0)}}
-    >
-      <span class="text">Logs</span> {{fa-icon "angle-up"}}
-    </a>
-    {{#each details.foundQueryLogs as |QL QLIndex|}}
+<ul class="nav nav-tabs">
+  {{#if details.foundQueryLogs.length}}
+    <li class="nav-item">
+      <a {{action "changeTab" "logs"}} class="nav-link {{if (or (eq activeTab "logs")(not activeTab)) "active"}}" href="#">
+        Logs ({{details.foundQueryLogs.length}})
+      </a>
+    </li>
+  {{/if}}
+  {{#if details.foundInvestigations.length}}
+    <li class="nav-item">
+      <a {{action "changeTab" "investigations"}} class="nav-link {{if (eq activeTab "investigations") "active"}}" href="#">
+        Investigations ({{details.foundInvestigations.length}})
+      </a>
+    </li>
+  {{/if}}
+  {{#if (and details.threats (not (eq block.entity.type "email")))}}
+    <li class="nav-item">
+      <a {{action "changeTab" "threats"}} class="nav-link {{if (eq activeTab "threats") "active"}}" href="#">
+        Add to Threat
+      </a>
+    </li>
+  {{/if}}
+</ul>
+
+
+{{#if (eq activeTab "threats")}}
+  <div>
+    <span class="p-value submit-title">Threat To Submit To: </span>
+    <select class="w-100" size=3 onchange={{action (mut threatKeyToAddIndicatorTo) value="target.value"}}>
+      {{#each-in details.threats as |threatName threatKey|}}
+        <option value="{{threatKey}}" selected={{eq threatKey threatKeyToAddIndicatorTo}}>{{threatName}}</option>
+      {{/each-in}}
+    </select>
+  </div>
+  <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
+    <button {{action "addIndicatorToThreat"}}
+            disabled={{isIndicatorRunning}}
+            class="p-btn btn btn-secondary m-0">
+      {{#if isIndicatorRunning}}
+        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+      {{else}}
+        Add Indicator to Threat
+      {{/if}}
+    </button>
+
+    {{#if indicatorMessage}}
+      <div class="create-message alert alert-info m-0">
+        {{indicatorMessage}}
+      </div>
+    {{/if}}
+
+    {{#if indicatorErrorMessage}}
+      <div class="create-message alert alert-danger m-0">
+        {{indicatorErrorMessage}}
+      </div>
+    {{/if}}
+  </div>
+{{/if}}
+
+{{#if (eq activeTab "logs")}}
+  {{#each details.foundQueryLogs as |QL QLIndex|}}
       {{#if (gt QLIndex 0)}}
         <hr>
       {{/if}}
@@ -316,27 +367,12 @@
         {{/if}}
       </div>
     {{/each}}
-  {{else}}
-    <a
-      href="#"
-      class="expandable-title larger"
-      {{on "click" (action "toggleExpandableTitle"  "logsExpanded" 0)}}
-    >
-      <span class="text">Logs</span> {{fa-icon "angle-down"}}
-    </a>
-  {{/if}}
 {{/if}}
 
-{{#if details.foundInvestigations.length}}
-  {{#if (get expandableTitleStates "investigationsExpanded.0")}}
-    <a
-      href="#"
-      class="expandable-title larger"
-      {{on "click" (action "toggleExpandableTitle" "investigationsExpanded" 0)}}
-    >
-      <span class="text">Investigations</span> {{fa-icon "angle-up"}}
-    </a>
-    {{#each details.foundInvestigations as |investigation investigationIndex|}}
+
+
+{{#if (eq activeTab "investigations")}}
+  {{#each details.foundInvestigations as |investigation investigationIndex|}}
       {{#if (gt investigationIndex 0)}}
         <hr>
       {{/if}}
@@ -413,13 +449,4 @@
         {{/if}}
       </div>
     {{/each}} 
-  {{else}}
-    <a
-      href="#"
-      class="expandable-title larger"
-      {{on "click" (action "toggleExpandableTitle" "investigationsExpanded" 0)}}
-    >
-      <span class="text">Investigations</span> {{fa-icon "angle-down"}}
-    </a>
-  {{/if}}
 {{/if}}

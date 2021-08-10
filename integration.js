@@ -8,6 +8,7 @@ const createRequestWithDefaults = require('./src/createRequestWithDefaults');
 const { INVESTIGATION_REFRESH_TIME } = require('./src/constants');
 const getLookupResults = require('./src/getLookupResults');
 const refreshInvestigations = require('./src/refreshInvestigations');
+const addIndicatorToThreat = require('./src/addIndicatorToThreat');
 
 let Logger;
 let requestWithDefaults;
@@ -83,6 +84,19 @@ const mustGetInvestigations = (options) =>
   options.apiKey !== previousApiKey ||
   options.regionCode.value !== previousRegionCode;
 
+const onMessageFunctions = {
+  addIndicatorToThreat
+};
+
+const onMessage = async ({ action, data: actionParams }, options, callback) =>
+  onMessageFunctions[action](
+    actionParams,
+    options,
+    requestWithDefaults,
+    callback,
+    Logger
+  );
+
 module.exports = {
   doLookup,
   startup,
@@ -91,5 +105,6 @@ module.exports = {
     setJob,
     getRequestWithDefaults,
     getLogger
-  )
+  ),
+  onMessage
 };
