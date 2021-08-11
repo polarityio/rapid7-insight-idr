@@ -1,3 +1,5 @@
+const { get } = require('lodash/fp');
+
 const addIndicatorToThreat = async (
   { entity, threatKeyToAddIndicatorTo },
   options,
@@ -23,15 +25,15 @@ const addIndicatorToThreat = async (
       json: true
     });
 
-    if(response.statusCode !== 200) {
+    if (response.statusCode !== 200) {
       throw new Error(
-        response.body.message ||
-          JSON.stringify(response.body) ||
+        get('body.message', response) ||
+          (response.body && JSON.stringify(response.body)) ||
           'Adding Indicator to Threat Failed'
       );
     }
 
-    callback(null, { });
+    callback(null, {});
   } catch (error) {
     Logger.error(
       error,

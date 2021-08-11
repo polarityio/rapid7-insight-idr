@@ -32,7 +32,9 @@ module.exports = {
       name: 'Nexpose Insight IDR API Key',
       description:
         'Your API key for Nexpose Insight IDR. To see how to create a new API Key, you can ' +
-        'check out Nexpose Documentation (https://docs.rapid7.com/insight/managing-platform-api-keys/).',
+        'check out Nexpose Documentation (https://docs.rapid7.com/insight/managing-platform-api-keys/). ' +
+        'In order to Assign Users to Investigations, your API Key must have Organization ' +
+        'Admin level or above permissions.  If your key is at the User level, Assigning Users to Investigations will be disabled.',
       default: '',
       type: 'password',
       userCanEdit: true,

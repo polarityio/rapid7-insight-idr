@@ -2,6 +2,7 @@ const { parseKeyValueOptionList, splitOutIgnoredIps } = require('./dataTransform
 
 const searchQueryLogs = require('./searchQueryLogs');
 const searchInvestigations = require('./searchInvestigations');
+const getUsers = require('./getUsers');
 const createLookupResults = require('./createLookupResults');
 const { map } = require('lodash/fp');
 
@@ -24,7 +25,9 @@ const getLookupResults = async (
 
   const threats = parseKeyValueOptionList('threats', options);
 
-  const lookupResults = createLookupResults(foundEntities, threats, Logger);
+  const users = await getUsers(options, requestWithDefaults, Logger);
+
+  const lookupResults = createLookupResults(foundEntities, threats, users, Logger);
 
   return lookupResults.concat(ignoredIpLookupResults);
 };

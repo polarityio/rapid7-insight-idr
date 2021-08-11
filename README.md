@@ -12,7 +12,9 @@ To learn more about Nexpose Insight IDR, visit the [official website](https://do
 ## Nexpose Insight IDR Integration Options
 
 ### Nexpose Insight IDR API Key
-Your API key for Nexpose Insight IDR. To see how to create a new API Key, you can [View Nexpose's Documentation](https://docs.rapid7.com/insight/managing-platform-api-keys/).
+Your API key for Nexpose Insight IDR. To see how to create a new API Key, you can [View Nexpose's Documentation](https://docs.rapid7.com/insight/managing-platform-api-keys/). In order to Assign Users to Investigations, your API Key must have Organization Admin level or above permissions.  
+
+> ***NOTE:*** If your key is at the User level, Assigning Users to Investigations will be disabled.
 
 ### Nexpose Region Code
 The API Region Code that will be used to search Nexpose's API. To check your data region, you can [View Nexpose's Documentation](https://docs.rapid7.com/insight/navigate-the-insight-platform/#check-your-data-region).

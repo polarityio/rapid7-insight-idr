@@ -1,6 +1,6 @@
 const { flow, map, size, compact } = require('lodash/fp');
 
-const createLookupResults = (foundEntities, threats, Logger) =>
+const createLookupResults = (foundEntities, threats, users, Logger) =>
   flow(
     map(({ entity, foundQueryLogs, foundInvestigations }) => {
       let lookupResult;
@@ -12,7 +12,8 @@ const createLookupResults = (foundEntities, threats, Logger) =>
             details: {
               foundQueryLogs,
               foundInvestigations,
-              threats
+              threats,
+              users
             }
           }
         };

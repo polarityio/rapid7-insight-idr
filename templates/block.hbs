@@ -448,5 +448,64 @@
           {{/if}}
         {{/if}}
       </div>
+
+      {{#if details.users.length}}
+        <div>
+          <span class="p-value submit-title">Assign to New User: </span>
+          <select class="w-100" size=2 onchange={{action "editSelectedUser" investigationIndex}}>
+            {{#each details.users as |user|}}
+              <option value="{{user.id}}">{{user.email}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="d-flex flex-row justify-content-between align-items-center">
+          <button {{action "assignUserToInvestigation" investigation.id}}
+                  disabled={{isAssignRunning}}
+                  class="p-btn btn btn-secondary close-btn assign">
+            {{#if isAssignRunning}}
+              {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+            {{else}}
+              <em>Assign User to Investigation</em>
+            {{/if}}
+          </button>
+
+          {{#if (get assignMessage investigationIndex)}}
+            <div class="create-message alert alert-info m-0">
+              {{get assignMessage investigationIndex}}
+            </div>
+          {{/if}}
+
+          {{#if (get assignErrorMessage investigationIndex)}}
+            <div class="create-message alert alert-danger m-0">
+              {{get assignErrorMessage investigationIndex}}
+            </div>
+          {{/if}}
+        </div>
+      {{/if}}
+      {{#if (eq investigation.status "OPEN")}}
+        <div class="d-flex flex-row justify-content-between align-items-center">
+          <button {{action "closeInvestigation" investigation.id}}
+                  disabled={{isCloseInvestigationRunning}}
+                  class="p-btn btn btn-secondary close-btn closing">
+            {{#if isCloseInvestigationRunning}}
+              {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+            {{else}}
+              <em>Close Investigation</em>
+            {{/if}}
+          </button>
+
+          {{#if (get closeInvestigationMessage investigationIndex)}}
+            <div class="create-message alert alert-info m-0">
+              {{closeInvestigationMessage}}
+            </div>
+          {{/if}}
+
+          {{#if (get closeInvestigationErrorMessage investigationIndex)}}
+            <div class="create-message alert alert-danger m-0">
+              {{closeInvestigationErrorMessage}}
+            </div>
+          {{/if}}
+        </div>
+      {{/if}}
     {{/each}} 
 {{/if}}

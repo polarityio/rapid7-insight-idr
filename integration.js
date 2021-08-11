@@ -9,6 +9,8 @@ const { INVESTIGATION_REFRESH_TIME } = require('./src/constants');
 const getLookupResults = require('./src/getLookupResults');
 const refreshInvestigations = require('./src/refreshInvestigations');
 const addIndicatorToThreat = require('./src/addIndicatorToThreat');
+const closeInvestigation = require('./src/closeInvestigation');
+const assignUserToInvestigation = require('./src/assignUserToInvestigation');
 
 let Logger;
 let requestWithDefaults;
@@ -85,7 +87,9 @@ const mustGetInvestigations = (options) =>
   options.regionCode.value !== previousRegionCode;
 
 const onMessageFunctions = {
-  addIndicatorToThreat
+  addIndicatorToThreat,
+  closeInvestigation,
+  assignUserToInvestigation
 };
 
 const onMessage = async ({ action, data: actionParams }, options, callback) =>
