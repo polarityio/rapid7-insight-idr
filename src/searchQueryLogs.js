@@ -33,7 +33,6 @@ const searchQueryLogs = async (
     get('body.events'),
     map((event) => ({
       ...event,
-      //TODO: add transformation for getting displayable user name
       message: event.message[0] === '{' ? JSON.parse(event.message) : event.message
     })),
     concat(_allQueryLogs),

@@ -4,8 +4,6 @@
 
 The Polarity Nexpose Insight IDR Integration allows you to easily Query Emails, IP Addresses, Domains, and URLs in both Investigations, and Query Logs. You can also add Indicators to Threats, Close Investigations, and Assign Users to Investigations.
 
-<!-- TODO: Add image -->
-
 To learn more about Nexpose Insight IDR, visit the [official website](https://docs.rapid7.com/insightidr/).
 
 
