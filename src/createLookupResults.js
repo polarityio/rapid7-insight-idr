@@ -1,6 +1,8 @@
 const { flow, map, size, compact } = require('lodash/fp');
 
-const createLookupResults = (foundEntities, threats, users, Logger) =>
+let Logger;
+
+const createLookupResults = (foundEntities, threats, users, options, _Logger) =>
   flow(
     map(({ entity, foundQueryLogs, foundInvestigations }) => {
       let lookupResult;
@@ -8,7 +10,7 @@ const createLookupResults = (foundEntities, threats, users, Logger) =>
         lookupResult = {
           entity,
           data: {
-            summary: createSummary(foundQueryLogs, foundInvestigations),
+            summary: createSummary(foundQueryLogs, foundInvestigations, options),
             details: {
               foundQueryLogs,
               foundInvestigations,
@@ -28,13 +30,25 @@ const createLookupResults = (foundEntities, threats, users, Logger) =>
     compact
   )(foundEntities);
 
-const createSummary = (foundQueryLogs, foundInvestigations) => {
+const createSummary = (foundQueryLogs, foundInvestigations, options) => {
   const foundQueryLogsSize = size(foundQueryLogs);
   const foundInvestigationsSize = size(foundInvestigations);
 
   return [
-    ...(foundQueryLogsSize ? [`Query Logs: ${foundQueryLogsSize}`] : []),
-    ...(foundInvestigationsSize ? [`Investigations: ${foundInvestigationsSize}`] : [])
+    ...(foundQueryLogsSize
+      ? [
+          `Query Logs: ${foundQueryLogsSize}${
+            foundQueryLogsSize === options.maxResults ? '+' : ''
+          }`
+        ]
+      : []),
+    ...(foundInvestigationsSize
+      ? [
+          `Investigations: ${foundInvestigationsSize}${
+            foundInvestigationsSize === options.maxResults ? '+' : ''
+          }`
+        ]
+      : [])
   ];
 };
 

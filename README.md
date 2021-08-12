@@ -32,6 +32,8 @@ The amount of time back you would like to see logs from. Supported values includ
    -  month(s)
    -  year(s).
 
+### Max Investigation/Log Results Shown
+The maximum number of Investigation results shown on the Investigations tab, and the maximum number of Query Logs shown on the Logs tabs.
 
 ### Threats To add Indicators To
 This is a comma separated list of Threats you will be able to add entities/indicators to.  The format to use is `Threat Name 1->threat-key-uuid-1, Threat Name 2->threat-uuid-2` (e.g. `MP Threat->832f42d1-9247-4e35-b521-f815d84e0df0, ...`). 

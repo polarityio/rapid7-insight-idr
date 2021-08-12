@@ -7,6 +7,7 @@ module.exports = {
     'add Indicators to Threats, Close Investigations, and Assign Users to Investigations.',
   styles: ['./styles/styles.less'],
   entityTypes: ['IPv4', 'IPv6', 'email', 'domain', 'url'],
+  defaultColor: 'light-purple',
   block: {
     component: {
       file: './components/block.js'
@@ -111,6 +112,17 @@ module.exports = {
         'min(s) or minute(s), hr(s) or hour(s), day(s), week(s), month(s), or year(s)).',
       default: 'last 1 year',
       type: 'text',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'maxResults',
+      name: 'Max Investigation/Log Results Shown',
+      description:
+        'The maximum number of Investigation results shown on the Investigations tab, and ' +
+        'the maximum number of Query Logs shown on the Logs tabs.',
+      default: 20,
+      type: 'number',
       userCanEdit: true,
       adminOnly: false
     },

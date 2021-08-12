@@ -1,4 +1,4 @@
-const { flow, get, replace, find, eq, map, concat, orderBy } = require('lodash/fp');
+const { flow, get, replace, find, eq, map, concat, orderBy, slice, size } = require('lodash/fp');
 const { or } = require('./dataTransformations');
 
 const searchQueryLogs = async (
@@ -45,7 +45,7 @@ const searchQueryLogs = async (
     get('href')
   )(queryLogsResponse);
 
-  if (moreStuffUrl) {
+  if (moreStuffUrl && size(allQueryLogs) < options.maxResults) {
     return await searchQueryLogs(
       entity,
       options,
@@ -56,7 +56,7 @@ const searchQueryLogs = async (
     );
   }
 
-  return allQueryLogs;
+  return slice(0, options.maxResults, allQueryLogs);
 };
 
 module.exports = searchQueryLogs;

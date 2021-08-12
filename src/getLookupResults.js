@@ -27,7 +27,13 @@ const getLookupResults = async (
 
   const users = await getUsers(options, requestWithDefaults, Logger);
 
-  const lookupResults = createLookupResults(foundEntities, threats, users, Logger);
+  const lookupResults = createLookupResults(
+    foundEntities,
+    threats,
+    users,
+    options,
+    Logger
+  );
 
   return lookupResults.concat(ignoredIpLookupResults);
 };
@@ -48,7 +54,12 @@ const _getFoundEntities = async (
         Logger
       );
 
-      const foundInvestigations = searchInvestigations(entity, investigations, Logger);
+      const foundInvestigations = searchInvestigations(
+        entity,
+        investigations,
+        options,
+        Logger
+      );
 
       return { entity, foundQueryLogs, foundInvestigations };
     }, entitiesPartition)

@@ -1,6 +1,5 @@
-const { filter, flow, get, includes, some } = require('lodash/fp');
+const { filter, flow, get, includes, some, slice } = require('lodash/fp');
 const { createFunctionMap } = require('./dataTransformations');
-let Logger;
 
 const doKeysIncludeEntityValue = (paths) => (entity) => (investigation) =>
   some((path) => flow(get(path), includes(get('value', entity)))(investigation), paths);
@@ -13,9 +12,11 @@ const isEntityInInvestigationByType = createFunctionMap({
   url: doKeysIncludeEntityValue(['title'])
 });
 
-const searchInvestigations = (entity, investigations, _Logger) => {
-  Logger = _Logger;
-  return filter(isEntityInInvestigationByType('type', entity), investigations);
-};
+const searchInvestigations = (entity, investigations, options, _Logger) =>
+  flow(
+    filter(isEntityInInvestigationByType('type', entity)),
+    slice(0, options.maxResults)
+  )(investigations);
+
 
 module.exports = searchInvestigations;
