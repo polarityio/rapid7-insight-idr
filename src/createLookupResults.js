@@ -1,19 +1,22 @@
-const fp = require('lodash/fp');
+const { flow, map, size, compact, filter, eq, get } = require('lodash/fp');
 
-let maxUniqueKeyNumber = 0;
+let Logger;
 
-const createLookupResults = (foundEntities, Logger) =>
-  fp.flow(
-    fp.map(({ entity, result }) => {
+const createLookupResults = (foundEntities, threats, users, options, _Logger) =>
+  flow(
+    map(({ entity, foundQueryLogs, foundInvestigations }) => {
       let lookupResult;
-      if (fp.size(result)) {
-        maxUniqueKeyNumber++;
-        const formattedResult = formatResult(result);
+      if (size(foundQueryLogs) || size(foundInvestigations)) {
         lookupResult = {
           entity,
           data: {
-            summary: createSummary(formattedResult),
-            details: formattedResult
+            summary: createSummary(foundQueryLogs, foundInvestigations, options),
+            details: {
+              foundQueryLogs,
+              foundInvestigations,
+              threats,
+              users
+            }
           }
         };
       } else {
@@ -24,15 +27,45 @@ const createLookupResults = (foundEntities, Logger) =>
       }
       return lookupResult;
     }),
-    fp.compact
+    compact
   )(foundEntities);
 
-const createSummary = (result) => [];
+const createSummary = (foundQueryLogs, foundInvestigations, options) => {
+  const foundQueryLogsSize = size(foundQueryLogs);
+  const foundInvestigationsSize = size(foundInvestigations);
+  const openInvestigationsSize =
+    foundQueryLogsSize &&
+    flow(filter(flow(get('status'), eq('OPEN'))), size)(foundInvestigations);
 
-
-const formatResult = (result) => ({
-  ...result,
-
-});
+  return [
+    ...(foundQueryLogsSize
+      ? [
+          `Query Logs: ${foundQueryLogsSize}${
+            foundQueryLogsSize === options.maxResults ? '+' : ''
+          }`
+        ]
+      : []),
+    ...(foundInvestigationsSize && !openInvestigationsSize
+      ? [
+          `Investigations: ${foundInvestigationsSize}${
+            foundInvestigationsSize === options.maxResults ? '+' : ''
+          }`
+        ]
+      : openInvestigationsSize
+      ? [
+          `Open Investigations: ${openInvestigationsSize}${
+            foundInvestigationsSize === options.maxResults ? '+' : ''
+          }`,
+          ...(foundInvestigationsSize - openInvestigationsSize > 0
+            ? [
+                `Closed Investigations: ${
+                  foundInvestigationsSize - openInvestigationsSize
+                }${foundInvestigationsSize === options.maxResults ? '+' : ''}`
+              ]
+            : [])
+        ]
+      : [])
+  ];
+};
 
 module.exports = createLookupResults;

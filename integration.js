@@ -1,14 +1,38 @@
 'use strict';
 const fp = require('lodash/fp');
+let schedule = require('node-schedule');
 
 const validateOptions = require('./src/validateOptions');
 const createRequestWithDefaults = require('./src/createRequestWithDefaults');
 
-const { handleError } = require('./src/handleError');
-const { getLookupResults } = require('./src/getLookupResults');
+const { INVESTIGATION_REFRESH_TIME } = require('./src/constants');
+const getLookupResults = require('./src/getLookupResults');
+const refreshInvestigations = require('./src/refreshInvestigations');
+const addIndicatorToThreat = require('./src/addIndicatorToThreat');
+const closeInvestigation = require('./src/closeInvestigation');
+const assignUserToInvestigation = require('./src/assignUserToInvestigation');
 
 let Logger;
 let requestWithDefaults;
+let investigations;
+let previousRegionCode;
+let previousApiKey;
+let job;
+
+const setInvestigations = (_investigations, _previousApiKey, _previousRegionCode) => {
+  investigations = _investigations;
+  previousApiKey = _previousApiKey;
+  previousRegionCode = _previousRegionCode;
+};
+
+const setJob = (_job) => {
+  if (fp.get('cancel', job)) job.cancel();
+  job = _job;
+};
+
+const getRequestWithDefaults = () => requestWithDefaults;
+const getLogger = () => Logger;
+
 const startup = (logger) => {
   Logger = logger;
   requestWithDefaults = createRequestWithDefaults(Logger);
@@ -19,12 +43,32 @@ const doLookup = async (entities, options, cb) => {
 
   let lookupResults;
   try {
+    let shouldStartNewJob;
+    if (mustGetInvestigations(options)) {
+      setJob();
+      await refreshInvestigations(
+        setInvestigations,
+        options,
+        requestWithDefaults,
+        Logger
+      )();
+      shouldStartNewJob = true;
+    }
     lookupResults = await getLookupResults(
       entities,
+      investigations,
       options,
       requestWithDefaults,
       Logger
     );
+    if (shouldStartNewJob) {
+      setJob(
+        schedule.scheduleJob(
+          `*/${INVESTIGATION_REFRESH_TIME} * * * *`,
+          refreshInvestigations(setInvestigations, options, requestWithDefaults, Logger)
+        )
+      );
+    }
   } catch (error) {
     Logger.error({ error }, 'Get Lookup Results Failed');
     return cb({
@@ -37,8 +81,34 @@ const doLookup = async (entities, options, cb) => {
   cb(null, lookupResults);
 };
 
+const mustGetInvestigations = (options) =>
+  !fp.size(investigations) ||
+  options.apiKey !== previousApiKey ||
+  options.regionCode.value !== previousRegionCode;
+
+const onMessageFunctions = {
+  addIndicatorToThreat,
+  closeInvestigation,
+  assignUserToInvestigation
+};
+
+const onMessage = async ({ action, data: actionParams }, options, callback) =>
+  onMessageFunctions[action](
+    actionParams,
+    options,
+    requestWithDefaults,
+    callback,
+    Logger
+  );
+
 module.exports = {
   doLookup,
   startup,
-  validateOptions
+  validateOptions: validateOptions(
+    setInvestigations,
+    setJob,
+    getRequestWithDefaults,
+    getLogger
+  ),
+  onMessage
 };
