@@ -6,11 +6,7 @@ const refreshInvestigations = require('./refreshInvestigations');
 const { parseKeyValueOptionList } = require('./dataTransformations');
 const { INVESTIGATION_REFRESH_TIME } = require('./constants');
 
-const validateOptions =
-  (setInvestigations, setJob, getRequestWithDefaults, getLogger) =>
-  (options, callback) => {
-    const Logger = getLogger();
-    const requestWithDefaults = getRequestWithDefaults();
+const validateOptions = (options, callback) => {
     const stringOptionsErrorMessages = {
       apiKey: 'You must provide a valid API Key from your Nexpose Insight Account',
       logQuery: 'You must have a query, and cannot leave this field blank'
@@ -53,17 +49,17 @@ const validateOptions =
       .concat(logQueryHasNoEntity)
       .concat(threatsNotParsable);
 
-    if (!errors.length) {
-      Logger.info(
-        `Refresh Investigations Data Time set to ${INVESTIGATION_REFRESH_TIME} minutes`
-      );
-      setJob(
-        schedule.scheduleJob(
-          `*/${INVESTIGATION_REFRESH_TIME} * * * *`,
-          refreshInvestigations(setInvestigations, options, requestWithDefaults, Logger)
-        )
-      );
-    }
+    // if (!errors.length) {
+    //   Logger.info(
+    //     `Refresh Investigations Data Time set to ${INVESTIGATION_REFRESH_TIME} minutes`
+    //   );
+    //   setJob(
+    //     schedule.scheduleJob(
+    //       `*/${INVESTIGATION_REFRESH_TIME} * * * *`,
+    //       refreshInvestigations(setInvestigations, options, requestWithDefaults, Logger)
+    //     )
+    //   );
+    // }
 
     callback(null, errors);
   };

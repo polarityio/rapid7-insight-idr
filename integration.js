@@ -1,13 +1,8 @@
 'use strict';
-const fp = require('lodash/fp');
-let schedule = require('node-schedule');
-
 const validateOptions = require('./src/validateOptions');
 const createRequestWithDefaults = require('./src/createRequestWithDefaults');
-
-const { INVESTIGATION_REFRESH_TIME } = require('./src/constants');
+const _ = require('lodash');
 const getLookupResults = require('./src/getLookupResults');
-const refreshInvestigations = require('./src/refreshInvestigations');
 const addIndicatorToThreat = require('./src/addIndicatorToThreat');
 const closeInvestigation = require('./src/closeInvestigation');
 const assignUserToInvestigation = require('./src/assignUserToInvestigation');
@@ -15,23 +10,10 @@ const assignUserToInvestigation = require('./src/assignUserToInvestigation');
 let Logger;
 let requestWithDefaults;
 let investigations;
-let previousRegionCode;
-let previousApiKey;
-let job;
-
-const setInvestigations = (_investigations, _previousApiKey, _previousRegionCode) => {
-  investigations = _investigations;
-  previousApiKey = _previousApiKey;
-  previousRegionCode = _previousRegionCode;
-};
-
-const setJob = (_job) => {
-  if (fp.get('cancel', job)) job.cancel();
-  job = _job;
-};
-
-const getRequestWithDefaults = () => requestWithDefaults;
-const getLogger = () => Logger;
+let displayFieldsCompiled = null;
+let previousDisplayFields = null;
+let summaryFieldsCompiled = null;
+let summaryDisplayFields = null;
 
 const startup = (logger) => {
   Logger = logger;
@@ -41,19 +23,18 @@ const startup = (logger) => {
 const doLookup = async (entities, options, cb) => {
   Logger.debug({ entities }, 'Entities');
 
+  if (previousDisplayFields === null || previousDisplayFields !== options.displayFields) {
+    displayFieldsCompiled = _compileFieldsOption(options.displayFields);
+    previousDisplayFields = options.displayFields;
+  }
+
+  if (summaryDisplayFields === null || summaryDisplayFields !== options.summaryFields) {
+    summaryFieldsCompiled = _compileFieldsOption(options.summaryFields);
+    summaryDisplayFields = options.summaryFields;
+  }
+
   let lookupResults;
   try {
-    let shouldStartNewJob;
-    if (mustGetInvestigations(options)) {
-      setJob();
-      await refreshInvestigations(
-        setInvestigations,
-        options,
-        requestWithDefaults,
-        Logger
-      )();
-      shouldStartNewJob = true;
-    }
     lookupResults = await getLookupResults(
       entities,
       investigations,
@@ -61,14 +42,51 @@ const doLookup = async (entities, options, cb) => {
       requestWithDefaults,
       Logger
     );
-    if (shouldStartNewJob) {
-      setJob(
-        schedule.scheduleJob(
-          `*/${INVESTIGATION_REFRESH_TIME} * * * *`,
-          refreshInvestigations(setInvestigations, options, requestWithDefaults, Logger)
-        )
-      );
-    }
+
+    lookupResults.forEach((result) => {
+      if (result.data !== null) {
+        const foundQueryLogs = result.data.details.foundQueryLogs;
+        // Summary tags for log searches with events
+        if (
+          summaryFieldsCompiled.length > 0 &&
+          Array.isArray(foundQueryLogs.events) &&
+          foundQueryLogs.events.length > 0
+        ) {
+          const summaryTags = _getEventSummaryTags(foundQueryLogs.events);
+          if (summaryTags.length > 0) {
+            result.data.summary = summaryTags;
+          }
+        } else if (
+          foundQueryLogs.statistics &&
+          Object.keys(foundQueryLogs.statistics.stats).length > 0
+        ) {
+          // Summary tags for single value stats
+          const statKey = Object.keys(foundQueryLogs.statistics.stats)[0];
+          const statType = Object.keys(foundQueryLogs.statistics.stats[statKey])[0];
+          const statValue = foundQueryLogs.statistics.stats[statKey][statType];
+          result.data.summary = [`${statType}(${statKey})=${statValue}`];
+        } else if (
+          Array.isArray(foundQueryLogs.formattedGroupStats) &&
+          foundQueryLogs.formattedGroupStats.length > 0
+        ) {
+          // Summary tags for groupby
+          const numResults = foundQueryLogs.formattedGroupStats.length;
+          const firstGroupBy = foundQueryLogs.formattedGroupStats[0];
+          const numGroupBys = foundQueryLogs.formattedGroupStats[0].groupings.length;
+          const values = firstGroupBy.groupings
+            .map((item) => item.groupByValue)
+            .join(' > ');
+          const summary = [`${values}: ${firstGroupBy.stat.statValue}`];
+          if (numResults > 1) {
+            summary.push(`+${numResults - 1} more`);
+          }
+          result.data.summary = summary;
+        }
+        result.data.details.foundQueryLogs.events.forEach((log) => {
+          log.fields = _getDisplayFields(log.message);
+        });
+      }
+    });
   } catch (error) {
     Logger.error({ error }, 'Get Lookup Results Failed');
     return cb({
@@ -81,10 +99,84 @@ const doLookup = async (entities, options, cb) => {
   cb(null, lookupResults);
 };
 
-const mustGetInvestigations = (options) =>
-  !fp.size(investigations) ||
-  options.apiKey !== previousApiKey ||
-  options.regionCode.value !== previousRegionCode;
+function _getEventSummaryTags(logs) {
+  let tags = [];
+  let uniqueValues = new Set();
+
+  logs.forEach((log) => {
+    summaryFieldsCompiled.forEach((rule) => {
+      let value = _.get(log.message, rule.path, null);
+      let alreadyExists = uniqueValues.has(value);
+
+      if (!alreadyExists) {
+        if (value !== null) {
+          if (rule.label.length > 0) {
+            tags.push(`${rule.label}: ${value}`);
+          } else {
+            tags.push(value);
+          }
+
+          uniqueValues.add(value);
+        }
+      }
+    });
+  });
+
+  return tags;
+}
+
+function _getDisplayFields(message) {
+  let values = [];
+
+  displayFieldsCompiled.forEach((rule) => {
+    let value = _.get(message, rule.path, null);
+    if (value !== null) {
+      values.push({
+        label: rule.label,
+        value
+      });
+    }
+  });
+
+  return values;
+}
+
+function _compileFieldsOption(fields, useDefaultLabels = true) {
+  const compiledFields = [];
+
+  if (fields.trim().length === 0) {
+    return compiledFields;
+  }
+
+  fields.split(',').forEach((field) => {
+    let tokens = field.split(':');
+    let label;
+    let fieldPath;
+
+    if (tokens.length !== 1 && tokens.length !== 2) {
+      throw new CompileException(
+        `Invalid field "${field}".  Field should be of the format "<label>:<json path>" or "<json path>"`
+      );
+    }
+
+    if (tokens.length === 1) {
+      // no label
+      fieldPath = tokens[0].trim();
+      label = useDefaultLabels ? tokens[0].trim() : '';
+    } else if (tokens.length === 2) {
+      // label specified
+      fieldPath = tokens[1].trim();
+      label = tokens[0].trim();
+    }
+
+    compiledFields.push({
+      label,
+      path: fieldPath
+    });
+  });
+
+  return compiledFields;
+}
 
 const onMessageFunctions = {
   addIndicatorToThreat,
@@ -104,11 +196,6 @@ const onMessage = async ({ action, data: actionParams }, options, callback) =>
 module.exports = {
   doLookup,
   startup,
-  validateOptions: validateOptions(
-    setInvestigations,
-    setJob,
-    getRequestWithDefaults,
-    getLogger
-  ),
+  validateOptions,
   onMessage
 };

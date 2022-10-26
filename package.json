@@ -1,13 +1,14 @@
 {
   "main": "./integration.js",
-  "name": "nexpose-insight-idr",
-  "version": "3.0.1-beta",
+  "name": "rapid7-insight-idr",
+  "version": "3.1.0",
   "private": true,
   "license": "MIT",
   "author": "Polarity",
   "dependencies": {
     "lodash": "^4.17.15",
     "node-schedule": "^2.0.0",
-    "postman-request": "*"
+    "postman-request": "^2.88.1-postman.31",
+    "async": "^3.2.4"
   }
 }

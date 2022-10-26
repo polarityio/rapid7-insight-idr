@@ -6,7 +6,7 @@ const createLookupResults = (foundEntities, threats, users, options, _Logger) =>
   flow(
     map(({ entity, foundQueryLogs, foundInvestigations }) => {
       let lookupResult;
-      if (size(foundQueryLogs) || size(foundInvestigations)) {
+      if (hasResults(foundQueryLogs, foundInvestigations, options)) {
         lookupResult = {
           entity,
           data: {
@@ -30,12 +30,40 @@ const createLookupResults = (foundEntities, threats, users, options, _Logger) =>
     compact
   )(foundEntities);
 
+function hasResults(foundQueryLogs, foundInvestigations, options) {
+  // Always return result if the option is set
+  if (options.showNoResults) {
+    return true;
+  }
+
+  // We have results if there are event logs or investigations
+  if (size(foundQueryLogs.events) || size(foundInvestigations)) {
+    return true;
+  }
+
+  // We have groupby results
+  if (size(foundQueryLogs.formattedGroupStats)) {
+    return true;
+  }
+
+  // We have stats
+  if (foundQueryLogs.statistics && Object.keys(foundQueryLogs.statistics.stats) > 0) {
+    return true;
+  }
+
+  return false;
+}
+
 const createSummary = (foundQueryLogs, foundInvestigations, options) => {
-  const foundQueryLogsSize = size(foundQueryLogs);
+  const foundQueryLogsSize = size(foundQueryLogs.events);
   const foundInvestigationsSize = size(foundInvestigations);
   const openInvestigationsSize =
     foundQueryLogsSize &&
     flow(filter(flow(get('status'), eq('OPEN'))), size)(foundInvestigations);
+
+  if (foundQueryLogsSize === 0) {
+    return ['No search results'];
+  }
 
   return [
     ...(foundQueryLogsSize

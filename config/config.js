@@ -1,12 +1,17 @@
 module.exports = {
-  name: 'Nexpose Insight IDR',
-  acronym: 'NI-IDR',
+  name: 'Rapid7 Insight IDR',
+  acronym: 'R7-IDR',
   description:
-    'The Polarity Nexpose Insight IDR Integration allows you to easily Query Emails, IP ' +
-    'Addresses, Domains, and URLs in both Investigations, and Query Logs. You can also ' +
-    'add Indicators to Threats, Close Investigations, and Assign Users to Investigations.',
+    'The Polarity Rapid7 Insight IDR Integration allows you to easily query Emails, IP ' +
+    'Addresses, Domains, and URLs in Logs.',
   styles: ['./styles/styles.less'],
-  entityTypes: ['IPv4', 'IPv6', 'email', 'domain', 'url'],
+  entityTypes: ['IPv4', 'IPv6', 'email', 'domain', 'url', 'hash'],
+  // customTypes: [
+  //   {
+  //     key: 'hostname',
+  //     regex: /windows-[a-z0-9]{7}/
+  //   }
+  // ],
   defaultColor: 'light-purple',
   block: {
     component: {
@@ -30,23 +35,23 @@ module.exports = {
   options: [
     {
       key: 'apiKey',
-      name: 'Nexpose Insight IDR API Key',
+      name: 'Rapid7 Insight IDR API Key',
       description:
-        'Your API key for Nexpose Insight IDR. To see how to create a new API Key, you can ' +
-        'check out Nexpose Documentation (https://docs.rapid7.com/insight/managing-platform-api-keys/). ' +
+        'Your API key for Rapid7 Insight IDR. To see how to create a new API Key, you can ' +
+        'check out Rapid7 Documentation (https://docs.rapid7.com/insight/managing-platform-api-keys/). ' +
         'In order to Assign Users to Investigations, your API Key must have Organization ' +
         'Admin level or above permissions.  If your key is at the User level, Assigning Users to Investigations will be disabled.',
       default: '',
       type: 'password',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: 'regionCode',
-      name: 'Nexpose Region Code',
+      name: 'Rapid7 Region Code',
       description:
-        "The API Region Code that will be used to search Nexpose's API. To check your data " +
-        'region, you can check out Nexpose Documentation (https://docs.rapid7.com/insight/navigate-the-insight-platform/#check-your-data-region).',
+        "The API Region Code that will be used to search Rapid7's API. To check your data " +
+        'region, you can check out Rapid7 Documentation (https://docs.rapid7.com/insight/navigate-the-insight-platform/#check-your-data-region).',
       default: {
         value: 'us',
         display: 'United States - 1'
@@ -83,14 +88,24 @@ module.exports = {
         }
       ],
       multiple: false,
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'opCode',
+      name: 'Op Code',
+      description:
+        'The alpha-numeric op code from the search app URL which can be found as "https://<region>.idr.insight.rapid7.com/op/{code}".  The `op code` value should not include the trailing `#`.',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: 'logQuery',
       name: 'Log Search Query',
       description:
-        'The query you want to run when searching Nexpose Log Data. The query follows the ' +
+        'The query you want to run when searching Rapid7 Log Data. The query follows the ' +
         'LEQL querying format (https://docs.rapid7.com/insightidr/build-a-query/#log-entry-query-language-leql), ' +
         'and must contain the variable "{{ENTITY}}" in order for the search to be executed properly.  ' +
         'The variable represented by the string "{{ENTITY}}" will be replaced by the actual entity ' +
@@ -99,8 +114,18 @@ module.exports = {
         'the logs where the entity appears.',
       default: 'where({{ENTITY}})',
       type: 'text',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'logset',
+      name: 'Log Sets to Query',
+      description:
+        'A comma delimited list of log sets you wish to query.  Log set names are case sensitive.',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: 'logQueryTimeRange',
@@ -109,38 +134,60 @@ module.exports = {
         'The amount of time back you would like to see logs from. Supported values include: ' +
         '"yesterday", "today", and "last x timeunits" where x is the number of time unit ' +
         'back from the current server time. (Supported time units (case insensitive): ' +
-        'min(s) or minute(s), hr(s) or hour(s), day(s), week(s), month(s), or year(s)).',
-      default: 'last 1 year',
+        'min(s) or minute(s), hr(s) or hour(s), day(s), week(s), month(s), or year(s)). For external links to work specify time in days (e.g., "last 360 days" instead of "last 1 year")',
+      default: 'last 30 days',
       type: 'text',
-      userCanEdit: true,
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'documentTitleField',
+      name: 'Document Title Field',
+      description:
+        '"message" field to use as the title for each returned document in the details template.  This field must be returned by your log query. If left blank, the log id will be used. This option should be set to "Users can view only".',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
       adminOnly: false
+    },
+    {
+      key: 'summaryFields',
+      name: 'Summary Fields',
+      description:
+        'Comma delimited list of field names to include as part of the summary tags.  JSON dot notation can be used to target nested attributes starting inside the "message" object. Fields must be returned by your search query to be displayed.  You can change the label for your fields by prepending the label to the field path and separating it with a colon (i.e., "<label>:<json path>").  If left blank, a result count will be shown. This option should be set to "Only Admins can View and Edit".',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'displayFields',
+      name: 'Display Fields',
+      description:
+        'Comma delimited list of field names to include as part of the details block.  JSON dot notation can be used to target nested attributes starting inside the "message" object. Fields must be returned by your search query to be displayed.  You can change the label for your fields by prepending the label to the field path and separating it with a colon (i.e., "<label>:<json path>").  If left blank, no fields tab will be shown. This option should be set to "Only Admins can View and Edit".',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: 'maxResults',
-      name: 'Max Investigation/Log Results Shown',
-      description:
-        'The maximum number of Investigation results shown on the Investigations tab, and ' +
-        'the maximum number of Query Logs shown on the Logs tabs.',
+      name: 'Max Log Results Shown',
+      description: 'The maximum number of log search results',
       default: 20,
       type: 'number',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
     {
-      key: 'threats',
-      name: 'Threats To add Indicators To',
+      key: 'showNoResults',
+      name: 'Show No Results',
       description:
-        'This is a comma separated list of Threats you will be able to add ' +
-        'entities/indicators to.  The format to use is ' +
-        '"Threat Name 1->threat-uuid-1, Threat Name 2->threat-uuid-2" (e.g. ' +
-        '"MP Threat->832f42d1-9247-4e35-b521-f815d84e0df0, ..."). ' +
-        'View Documentation for more details on how to get your Threat Key UUIDs. ' +
-        '(https://docs.rapid7.com/insightidr/threats/) ' +
-        'If left blank, adding an indicator/entities to threats will be disabled.',
-      default: '',
-      type: 'text',
-      userCanEdit: true,
-      adminOnly: false
+        'If checked, the integration will return a message indicating there were no search results. Note that `calculate` queries always return a result regardless of this setting.',
+      default: true,
+      type: 'boolean',
+      userCanEdit: false,
+      adminOnly: true
     }
   ]
 };
