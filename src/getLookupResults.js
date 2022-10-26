@@ -25,7 +25,7 @@ const getLookupResults = async (
 
   const threats = parseKeyValueOptionList('threats', options);
 
-  const users = await getUsers(options, requestWithDefaults, Logger);
+  const users = [];//await getUsers(options, requestWithDefaults, Logger);
 
   const lookupResults = createLookupResults(
     foundEntities,
@@ -54,14 +54,14 @@ const _getFoundEntities = async (
         Logger
       );
 
-      const foundInvestigations = searchInvestigations(
-        entity,
-        investigations,
-        options,
-        Logger
-      );
+      // const foundInvestigations = searchInvestigations(
+      //   entity,
+      //   investigations,
+      //   options,
+      //   Logger
+      // );
 
-      return { entity, foundQueryLogs, foundInvestigations };
+      return { entity, foundQueryLogs };
     }, entitiesPartition)
   );
 

@@ -9,7 +9,8 @@ const isEntityInInvestigationByType = createFunctionMap({
   IPv6: doKeysIncludeEntityValue(['title']),
   email: doKeysIncludeEntityValue(['title', 'assignee.email']),
   domain: doKeysIncludeEntityValue(['title']),
-  url: doKeysIncludeEntityValue(['title'])
+  url: doKeysIncludeEntityValue(['title']),
+  hash: doKeysIncludeEntityValue(['title'])
 });
 
 const searchInvestigations = (entity, investigations, options, _Logger) =>

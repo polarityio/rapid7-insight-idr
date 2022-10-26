@@ -62,7 +62,7 @@ const createRequestWithDefaults = (Logger) => {
   };
 
   const checkForStatusError = ({ statusCode, body }, requestOptions) => {
-    Logger.trace({ statusCode, body, requestOptions });
+    Logger.trace({ statusCode, body, requestOptions }, 'Default Request Results');
 
     const roundedStatus = Math.round(statusCode / 100) * 100;
     if (![200, 400].includes(roundedStatus)) {

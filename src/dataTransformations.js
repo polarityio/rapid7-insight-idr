@@ -14,9 +14,9 @@ const groupEntities = (entities) =>
       isIP ? 'ip' : 
       isDomain ? 'domain' : 
       type === 'MAC' ? 'mac' : 
-      type === 'MD5' ? 'md5' : 
-      type === 'SHA1' ? 'sha1' : 
-      type === 'SHA256' ? 'sha256' : 
+      isMD5 === true ? 'md5' :
+      isSHA1 === true ? 'sha1' :
+      isSHA256 === true ? 'sha256' :
       'unknown'
     )
     .omit('unknown')
