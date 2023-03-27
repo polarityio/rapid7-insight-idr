@@ -1,4 +1,5 @@
 {
+  "polarityIntegrationUuid": "f8255ee0-cce1-11ed-aeee-075d3490155d",
   "name": "Rapid7 Insight IDR",
   "acronym": "R7-IDR",
   "description": "The Polarity Rapid7 Insight IDR Integration allows you to easily query Emails, IP Addresses, Domains, and URLs in Logs.",
