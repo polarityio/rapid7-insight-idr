@@ -7,8 +7,8 @@
   "author": "Polarity",
   "dependencies": {
     "lodash": "^4.17.21",
-    "node-schedule": "^2.0.0",
+    "node-schedule": "^2.1.1",
     "postman-request": "^2.88.1-postman.33",
-    "async": "^3.2.4"
+    "async": "^3.2.6"
   }
 }
