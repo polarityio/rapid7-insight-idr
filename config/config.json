@@ -6,14 +6,7 @@
   "styles": [
     "./styles/styles.less"
   ],
-  "entityTypes": [
-    "IPv4",
-    "IPv6",
-    "email",
-    "domain",
-    "url",
-    "hash"
-  ],
+  "entityTypes": ["IPv4", "IPv6", "email", "domain", "url", "MD5", "SHA1", "SHA256"],
   "defaultColor": "light-purple",
   "block": {
     "component": {
@@ -22,13 +15,6 @@
     "template": {
       "file": "./templates/block.hbs"
     }
-  },
-  "request": {
-    "cert": "",
-    "key": "",
-    "passphrase": "",
-    "ca": "",
-    "proxy": ""
   },
   "logging": {
     "level": "info"
