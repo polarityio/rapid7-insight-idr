@@ -5,7 +5,7 @@ module.exports = {
     'The Polarity Rapid7 Insight IDR Integration allows you to easily query Emails, IP ' +
     'Addresses, Domains, and URLs in Logs.',
   styles: ['./styles/styles.less'],
-  entityTypes: ['IPv4', 'IPv6', 'email', 'domain', 'url', 'hash'],
+  entityTypes: ['IPv4', 'IPv6', 'email', 'domain', 'url', 'MD5', 'SHA1', 'SHA256'],
   // customTypes: [
   //   {
   //     key: 'hostname',
@@ -26,7 +26,7 @@ module.exports = {
     key: '',
     passphrase: '',
     ca: '',
-    proxy: ""
+    proxy: ''
   },
   logging: {
     level: 'info' //trace, debug, info, warn, error, fatal
